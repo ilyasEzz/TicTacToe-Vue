@@ -3,12 +3,7 @@
     <div class="centered" v-if="rowsNum">
       <div v-bind:key="i" v-for="(n, i) in rowsNum">
         <div v-bind:key="j" v-for="(n, j) in rowsNum">
-          <Cell
-            v-on:performMove="performMove(i, j)"
-            :value="board[i][j]"
-            v-bind:i="i"
-            v-bind:j="j"
-          ></Cell>
+          <Cell v-on:performMove="performMove(i, j)" :value="board[i][j]" v-bind:i="i" v-bind:j="j"></Cell>
         </div>
       </div>
     </div>
@@ -16,19 +11,20 @@
     <div v-else>
       <form @submit.prevent="start">
         <div>
-          <label for="player1">Player 1 </label>
+          <label for="player1">Player 1</label>
           <input v-model="player1" type="text" name="player1" />
         </div>
         <div>
-          <label for="player2">Player 2 </label>
+          <label for="player2">Player 2</label>
           <input v-model="player2" type="text" name="player2" />
         </div>
         <div>
-          <label for="rowsNum">Number of rows </label> <br />
+          <label for="rowsNum">Number of rows</label>
+          <br />
           <input type="number" min="2" id="rowsNum" required />
         </div>
         <div>
-          <label for="AI">Play with Computer </label>
+          <label for="AI">Play with Computer</label>
           <input type="checkbox" v-model="AI" id="AI" />
         </div>
         <input type="submit" value="Play" class="btn" />
@@ -39,30 +35,30 @@
 </template>
 
 <script>
-import Cell from './components/Cell.vue';
+import Cell from "./components/Cell.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     Cell
   },
   data() {
     return {
       rowsNum: null,
-      player1: '',
-      player2: '',
+      player1: "",
+      player2: "",
       board: [],
       turnCounter: 0,
       diagonal: [],
       reverseDiagonal: [],
       win: false,
-      message: '',
+      message: "",
       AI: false
     };
   },
   methods: {
     start() {
-      let num = document.querySelector('#rowsNum').value;
+      let num = document.querySelector("#rowsNum").value;
       num = Number.parseInt(num);
 
       // create board
@@ -70,7 +66,7 @@ export default {
       for (let i = 0; i < num; i++) {
         matrix[i] = [];
         for (let j = 0; j < num; j++) {
-          matrix[i].push('');
+          matrix[i].push("");
         }
       }
       this.board = matrix;
@@ -79,19 +75,20 @@ export default {
     },
     performMove(x, y) {
       if (!this.win) {
-        if (this.board[x][y] !== '') return null;
+        if (this.board[x][y] !== "") return null;
 
         this.turnCounter++;
 
         if (this.turnCounter % 2 !== 0) {
-          this.board[x][y] = 'x';
-        } else if (this.turnCounter % 2 === 0 && this.AI) {
-          this.AiPlay();
+          this.board[x][y] = "x";
         } else {
-          this.board[x][y] = 'o';
+          this.board[x][y] = "o";
         }
+
+        this.aiPlay();
         this.checkRowsCols();
         this.checkDiagonals(x, y);
+
         this.$forceUpdate();
       }
       this.displayWinner();
@@ -141,20 +138,24 @@ export default {
     },
 
     areEqual(arr) {
-      if (arr.every(value => value === arr[0] && value !== '')) {
+      if (arr.every(value => value === arr[0] && value !== "")) {
         return true;
       } else {
         return false;
       }
     },
-    AiPlay() {
+    aiPlay() {
+      this.turnCounter++;
       for (let i = 0; i < this.board.length; i++) {
-        for (let j = 0; j < this.board.length; j++) {
-          if (this.board[i][j] === '') {
-            this.board[i][j] === 'o';
-            return;
-          }
+        let empty = this.board[i].findIndex(value => value === "");
+        if (empty === -1) {
+          empty++;
+          i++;
         }
+        this.board[i][empty] = "o";
+
+        console.log(i, empty);
+        return;
       }
     },
 
@@ -163,10 +164,14 @@ export default {
 
       if (this.turnCounter % 2 !== 0) {
         this.message = `Player 1: ${this.player1} Won!`;
-      } else if (this.turnCounter % 2 === 0 && this.AI) {
-        this.message = 'You had lost!';
       } else {
         this.message = `Player 2: ${this.player2} Won!`;
+      }
+    },
+    emptySpot() {
+      for (let i = 0; i < this.board.length; i++) {
+        let emptyRow = this.board[i].filter(value => value === "");
+        console.log(emptyRow);
       }
     }
   }
